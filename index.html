@@ -162,7 +162,7 @@
             bottom: 10px;
             left: 10px;
             width: 280px;
-            height: 180px;
+            height: 85px;
             /* Tamaño reducido para que entre en el sobre */
             background-color: #fdfbf7;
             z-index: 2;
@@ -196,7 +196,7 @@
             bottom: 8px;
             left: 8px;
             right: 8px;
-            border: 1px dashed #dcae82;
+            border: 1px solid rgba(220, 174, 130, 0.45);
             border-radius: 8px;
             pointer-events: none;
             opacity: 0.5;
@@ -272,7 +272,7 @@
 
         /* Botón de acción */
         .btn {
-            margin-top: 15px;
+            margin-top: 60px;
             padding: 12px 24px;
             background-color: #d44545;
             color: white;
@@ -665,6 +665,37 @@
 
             to {
                 opacity: 1;
+            }
+        }
+
+        /* Responsive styling for small/short screens to prevent overlap */
+        @media (max-width: 600px), (max-height: 750px) {
+            .btn {
+                margin-top: 30px;
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+
+            .envelope.open {
+                transform: translateY(100px);
+            }
+
+            .envelope.open~.btn {
+                transform: translateY(100px);
+            }
+
+            .envelope.open~.btn:active {
+                transform: translateY(100px) scale(0.95);
+            }
+
+            .scroll-indicator {
+                bottom: 12px;
+                font-size: 0.8rem;
+            }
+
+            .scroll-indicator .arrow {
+                font-size: 1.1rem;
+                margin-top: 2px;
             }
         }
     </style>
