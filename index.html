@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Feliz Cumpleaños!</title>
+    <title>Sorpresa</title>
     <!-- Fuentes para la invitación: Caveat para manuscrito y Playfair Display para elegancia -->
     <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
@@ -748,6 +748,7 @@
         </div>
     </section>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
         const envelope = document.getElementById('envelope');
@@ -758,6 +759,28 @@
         const body = document.body;
 
         let isOpen = false;
+        let player;
+        let playerReady = false;
+        let fallbackUsed = false;
+
+        // Callback para inicializar la API de YouTube
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('music-player', {
+                height: '100%',
+                width: '100%',
+                videoId: '9e7_MzTR8oE',
+                playerVars: {
+                    'autoplay': 0,
+                    'playsinline': 1, // Previene reproducción a pantalla completa nativa en iOS
+                    'rel': 0
+                },
+                events: {
+                    'onReady': () => {
+                        playerReady = true;
+                    }
+                }
+            });
+        }
 
         toggleBtn.addEventListener('click', () => {
             isOpen = !isOpen; // Cambia el estado (true/false)
@@ -772,8 +795,13 @@
                 scrollIndicator.classList.add('visible');
                 body.classList.add('allow-scroll');
 
-                // Insertar video/música (No te imaginas - NTVG)
-                musicPlayerContainer.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/9e7_MzTR8oE?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                // Reproducir música (con manejo para forzar reproducción en iOS/Safari)
+                if (playerReady && player && typeof player.playVideo === 'function') {
+                    player.playVideo();
+                } else {
+                    fallbackUsed = true;
+                    musicPlayerContainer.innerHTML = '<iframe width="560" height="315" src="https://www.youtube.com/embed/9e7_MzTR8oE?autoplay=1&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                }
 
                 // Lanzar confeti espectacular desde el sobre si la librería cargó (evita errores si se abre sin internet o local)
                 if (typeof confetti === 'function') {
@@ -812,8 +840,22 @@
                 // Volver arriba suavemente
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // Detener música vaciando el reproductor
-                musicPlayerContainer.innerHTML = '';
+                // Detener música de forma segura
+                if (playerReady && !fallbackUsed && player && typeof player.pauseVideo === 'function') {
+                    player.pauseVideo();
+                } else {
+                    // Si se usó el fallback o la API no está lista, vaciamos para detener el sonido
+                    musicPlayerContainer.innerHTML = '';
+                    // Recreamos el placeholder para futuras aperturas
+                    const newPlaceholder = document.createElement('div');
+                    newPlaceholder.id = 'music-player';
+                    musicPlayerContainer.appendChild(newPlaceholder);
+                    fallbackUsed = false;
+                    playerReady = false;
+                    if (typeof YT !== 'undefined' && YT.Player) {
+                        onYouTubeIframeAPIReady();
+                    }
+                }
             }
         });
 
